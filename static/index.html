@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KI-Chatbot Lehrtool</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f9;
+        --panel: #ffffff;
+        --panel-soft: #eef3f8;
+        --ink: #17202a;
+        --muted: #667085;
+        --line: #d9e0e8;
+        --brand: #1663ff;
+        --brand-dark: #0d47c8;
+        --accent: #14845f;
+        --warn: #9f5f00;
+        --shadow: 0 16px 44px rgba(28, 36, 50, 0.1);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: minmax(300px, 380px) 1fr;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      aside {
+        background: #111827;
+        color: #f8fafc;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        min-height: 0;
+        overflow: auto;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: #f8fafc;
+        color: #111827;
+        font-weight: 800;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        line-height: 1.2;
+      }
+
+      .subtitle {
+        color: #cbd5e1;
+        font-size: 0.92rem;
+        margin-top: 4px;
+      }
+
+      .settings,
+      .lesson {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .settings {
+        display: grid;
+        gap: 14px;
+      }
+
+      label {
+        display: grid;
+        gap: 7px;
+        font-size: 0.84rem;
+        color: #e5e7eb;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 10px 11px;
+        outline: none;
+      }
+
+      textarea {
+        min-height: 118px;
+        resize: vertical;
+        line-height: 1.45;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.18);
+      }
+
+      .hint {
+        color: #aab6c7;
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+
+      .lesson h2 {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+      }
+
+      .lesson ol {
+        margin: 0;
+        padding-left: 20px;
+        color: #d8e0ea;
+        line-height: 1.55;
+        font-size: 0.86rem;
+      }
+
+      main {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        height: 100%;
+        min-height: 0;
+        min-width: 0;
+      }
+
+      .topbar {
+        min-height: 74px;
+        padding: 18px 28px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.86);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .topbar h2 {
+        font-size: 1.05rem;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .pill {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 12px;
+        background: var(--panel);
+        color: var(--muted);
+        white-space: nowrap;
+        font-size: 0.82rem;
+      }
+
+      .chat {
+        overflow: auto;
+        min-height: 0;
+        padding: 28px;
+      }
+
+      .welcome {
+        max-width: 860px;
+        margin: 0 auto 24px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        padding: 22px;
+      }
+
+      .welcome h3 {
+        font-size: 1.15rem;
+        margin-bottom: 8px;
+      }
+
+      .welcome p {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .message-list {
+        max-width: 860px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+
+      .message {
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        background: #e8eef7;
+        color: #203047;
+      }
+
+      .message.assistant .avatar {
+        background: #dff7ed;
+        color: #126346;
+      }
+
+      .bubble {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 16px;
+        line-height: 1.58;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .composer-wrap {
+        border-top: 1px solid var(--line);
+        background: rgba(246, 247, 249, 0.96);
+        padding: 18px 28px 24px;
+      }
+
+      .composer {
+        max-width: 860px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .composer textarea {
+        min-height: 58px;
+        max-height: 180px;
+        background: var(--panel);
+        color: var(--ink);
+        border-color: var(--line);
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 6px;
+        min-height: 44px;
+        padding: 0 16px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .send {
+        background: var(--brand);
+        color: white;
+      }
+
+      .send:hover {
+        background: var(--brand-dark);
+      }
+
+      .ghost {
+        color: var(--ink);
+        background: #e9edf2;
+      }
+
+      button:disabled {
+        opacity: 0.58;
+        cursor: not-allowed;
+      }
+
+      .error {
+        max-width: 860px;
+        margin: 0 auto 14px;
+        border: 1px solid #fac7c4;
+        background: #fff1f0;
+        color: #8a1f16;
+        border-radius: 8px;
+        padding: 12px 14px;
+        display: none;
+        overflow-wrap: anywhere;
+      }
+
+      .loading .bubble::after {
+        content: " ...";
+        color: var(--accent);
+      }
+
+      @media (max-width: 920px) {
+        body {
+          height: 100vh;
+          height: 100dvh;
+          overflow: hidden;
+        }
+
+        .app {
+          grid-template-columns: 1fr;
+          grid-template-rows: minmax(230px, 44vh) minmax(0, 1fr);
+          height: 100vh;
+          height: 100dvh;
+          overflow: hidden;
+        }
+
+        aside {
+          min-height: 0;
+          overflow: auto;
+        }
+
+        main {
+          min-height: 0;
+        }
+
+        .topbar,
+        .chat,
+        .composer-wrap {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .composer {
+          grid-template-columns: 1fr;
+        }
+
+        .actions {
+          justify-content: stretch;
+        }
+
+        .actions button {
+          flex: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside>
+        <div class="brand">
+          <div class="brand-mark">AI</div>
+          <div>
+            <h1>KI-Chatbot Lehrtool</h1>
+            <p class="subtitle">Ein ChatGPT-, Gemini- und Claude-artiges Lernfrontend.</p>
+          </div>
+        </div>
+
+        <section class="settings" aria-label="Chatbot Einstellungen">
+          <label>
+            Anbieter
+            <select id="provider">
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+              <option value="gemini">Gemini</option>
+            </select>
+          </label>
+
+          <label>
+            API Key
+            <input id="apiKey" type="password" autocomplete="off" placeholder="sk-... oder AIza..." />
+            <span class="hint">
+              Der Key wird nur an dein lokales Python-Backend gesendet und nicht gespeichert.
+            </span>
+          </label>
+
+          <label>
+            Modell
+            <input id="model" value="gpt-5-mini" />
+            <span class="hint" id="modelHint">OpenAI Beispiel: gpt-5-mini</span>
+          </label>
+
+          <label>
+            System Prompt
+            <textarea id="systemPrompt">Du bist ein hilfreicher Tutor. Erkläre verständlich, zeige kurze Beispiele und frage nach, wenn etwas unklar ist.</textarea>
+            <span class="hint">
+              Der System Prompt legt Verhalten und Rolle des Chatbots fest, bevor die Nutzernachricht verarbeitet wird.
+            </span>
+          </label>
+        </section>
+
+        <section class="lesson" aria-label="Kurzerklärung">
+          <h2>Was passiert technisch?</h2>
+          <ol>
+            <li>Das Frontend sammelt Anbieter, API-Key, Modell, System Prompt und Chatverlauf.</li>
+            <li>Der Browser sendet diese Daten per JSON an <strong>/api/chat</strong>.</li>
+            <li>Python übersetzt den Verlauf in das Format des gewählten Anbieters.</li>
+            <li>Die Antwort kommt zurück und wird als neue Chatblase angezeigt.</li>
+          </ol>
+        </section>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <h2>Chat</h2>
+            <p class="status" id="status">Bereit. Wähle einen Provider und sende eine Nachricht.</p>
+          </div>
+          <div class="pill" id="providerPill">Provider: OpenAI</div>
+        </header>
+
+        <section class="chat" id="chat" aria-live="polite">
+          <div class="welcome">
+            <h3>Baue deinen ersten KI-Chatbot</h3>
+            <p>
+              Dieses Beispiel ist bewusst transparent: Links konfigurierst du die Schnittstelle,
+              unten schreibst du Nachrichten, und das Python-Backend vermittelt zwischen UI und
+              KI-Anbieter. Für echte Produkte sollten API-Keys serverseitig in Umgebungsvariablen
+              liegen; hier darfst du sie eingeben, damit der Lernfluss sichtbar bleibt.
+            </p>
+          </div>
+          <div class="error" id="error"></div>
+          <div class="message-list" id="messages"></div>
+        </section>
+
+        <footer class="composer-wrap">
+          <form class="composer" id="chatForm">
+            <textarea
+              id="userInput"
+              placeholder="Schreibe deine Nachricht..."
+              required
+            ></textarea>
+            <div class="actions">
+              <button class="ghost" type="button" id="clearBtn">Leeren</button>
+              <button class="send" type="submit" id="sendBtn">Senden</button>
+            </div>
+          </form>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      const providerSelect = document.querySelector("#provider");
+      const apiKeyInput = document.querySelector("#apiKey");
+      const modelInput = document.querySelector("#model");
+      const modelHint = document.querySelector("#modelHint");
+      const systemPromptInput = document.querySelector("#systemPrompt");
+      const form = document.querySelector("#chatForm");
+      const userInput = document.querySelector("#userInput");
+      const messagesEl = document.querySelector("#messages");
+      const errorEl = document.querySelector("#error");
+      const statusEl = document.querySelector("#status");
+      const providerPill = document.querySelector("#providerPill");
+      const sendBtn = document.querySelector("#sendBtn");
+      const clearBtn = document.querySelector("#clearBtn");
+
+      const defaults = {
+        openai: { model: "gpt-5-mini", hint: "OpenAI Beispiel: gpt-5-mini" },
+        anthropic: {
+          model: "claude-opus-4-1-20250805",
+          hint: "Anthropic Beispiel: claude-opus-4-1-20250805",
+        },
+        gemini: { model: "gemini-2.5-flash", hint: "Gemini Beispiel: gemini-2.5-flash" },
+      };
+
+      const messages = [];
+
+      providerSelect.addEventListener("change", () => {
+        const provider = providerSelect.value;
+        modelInput.value = defaults[provider].model;
+        modelHint.textContent = defaults[provider].hint;
+        providerPill.textContent = `Provider: ${providerLabel(provider)}`;
+      });
+
+      clearBtn.addEventListener("click", () => {
+        messages.length = 0;
+        renderMessages();
+        setStatus("Chatverlauf geleert.");
+        hideError();
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        hideError();
+
+        const text = userInput.value.trim();
+        if (!text) return;
+        if (!apiKeyInput.value.trim()) {
+          showError("Bitte gib zuerst deinen API-Key ein.");
+          return;
+        }
+
+        messages.push({ role: "user", content: text });
+        userInput.value = "";
+        renderMessages();
+        setBusy(true);
+
+        const loadingId = addLoadingMessage();
+
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              provider: providerSelect.value,
+              apiKey: apiKeyInput.value.trim(),
+              model: modelInput.value.trim(),
+              systemPrompt: systemPromptInput.value,
+              messages,
+            }),
+          });
+
+          const data = await response.json();
+          removeLoadingMessage(loadingId);
+
+          if (!response.ok) {
+            throw new Error(formatProviderError(data));
+          }
+
+          messages.push({ role: "assistant", content: data.reply || "Keine Textantwort erhalten." });
+          renderMessages();
+          setStatus("Antwort empfangen.");
+        } catch (error) {
+          removeLoadingMessage(loadingId);
+          messages.pop();
+          renderMessages();
+          showError(error.message);
+          setStatus("Anfrage fehlgeschlagen.");
+        } finally {
+          setBusy(false);
+        }
+      });
+
+      function renderMessages() {
+        messagesEl.innerHTML = "";
+        for (const message of messages) {
+          messagesEl.appendChild(createMessageNode(message));
+        }
+        scrollChatToBottom();
+      }
+
+      function createMessageNode(message) {
+        const wrapper = document.createElement("article");
+        wrapper.className = `message ${message.role}`;
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = message.role === "assistant" ? "AI" : "Du";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = message.content;
+
+        wrapper.append(avatar, bubble);
+        return wrapper;
+      }
+
+      function addLoadingMessage() {
+        const id = crypto.randomUUID();
+        const node = createMessageNode({ role: "assistant", content: "Die KI denkt" });
+        node.classList.add("loading");
+        node.dataset.loadingId = id;
+        messagesEl.appendChild(node);
+        scrollChatToBottom();
+        return id;
+      }
+
+      function removeLoadingMessage(id) {
+        document.querySelector(`[data-loading-id="${id}"]`)?.remove();
+      }
+
+      function showError(message) {
+        errorEl.style.display = "block";
+        errorEl.textContent = message;
+      }
+
+      function hideError() {
+        errorEl.style.display = "none";
+        errorEl.textContent = "";
+      }
+
+      function setBusy(isBusy) {
+        sendBtn.disabled = isBusy;
+        clearBtn.disabled = isBusy;
+        providerSelect.disabled = isBusy;
+        modelInput.disabled = isBusy;
+        systemPromptInput.disabled = isBusy;
+        setStatus(isBusy ? "Sende Anfrage an das Python-Backend..." : "Bereit.");
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function providerLabel(provider) {
+        return { openai: "OpenAI", anthropic: "Anthropic", gemini: "Gemini" }[provider];
+      }
+
+      function formatProviderError(data) {
+        if (!data) return "Unbekannter Fehler.";
+        const details = data.details ? `\n${JSON.stringify(data.details, null, 2)}` : "";
+        return `${data.error || "Anfrage fehlgeschlagen."}${details}`;
+      }
+
+      function scrollChatToBottom() {
+        document.querySelector("#chat").scrollTop = document.querySelector("#chat").scrollHeight;
+      }
+    </script>
+  </body>
+</html>
